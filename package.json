@@ -1,0 +1,24 @@
+{
+  "name": "asbagentapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Turns an ASBData agent storefront into a native-looking Android app (Capacitor), built by GitHub Actions.",
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "prepare:app": "node scripts/prepare.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.1.0",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/browser": "^6.0.0",
+    "@capacitor/core": "^6.1.0",
+    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^6.1.0",
+    "sharp": "^0.33.0"
+  }
+}
