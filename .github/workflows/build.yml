@@ -28,7 +28,6 @@ jobs:
       API_BASE: ${{ vars.API_BASE || 'https://api.asbdataghana.com/api/v1' }}
       RELEASE_TAG: ${{ vars.RELEASE_TAG || 'agent-apps' }}
       STORE_BASE_DOMAIN: ${{ vars.STORE_BASE_DOMAIN || 'asbdataghana.com' }}
-      SITE_URL: ${{ vars.SITE_URL || 'https://asbdataghana.com' }}
     steps:
       - name: Check the subdomain
         run: |
