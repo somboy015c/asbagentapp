@@ -100,12 +100,6 @@ export function homeScreen() {
       h('button', { class: 'btn white', onclick: () => (signedIn ? switchTab('buy') : go('register')) }, signedIn ? 'Buy data now' : (c.cta.buttonText || 'Get started'))));
   }
 
-  // ---------------- Become an agent ----------------
-  root.append(h('div', { class: 'section' }, h('button', { class: 'card ripple', style: { width: '100%', textAlign: 'left', display: 'flex', gap: '14px', alignItems: 'center' }, onclick: () => go('agent') },
-    h('div', { class: 'feature', style: { padding: 0 } }, h('div', { class: 'ico' }, icon('store', 22))),
-    h('div', { style: { flex: 1 } }, h('h4', {}, 'Start your own data store'), h('p', { class: 'muted', style: { fontSize: '13.5px' } }, 'Become an agent and sell data under your own brand, with your own app.')),
-    icon('right', 20))));
-
   // ---------------- Contact ----------------
   const rows = [];
   if (s.support_phone) rows.push(contactRow('phone', 'Call us', s.support_phone, () => openExternal(`tel:${s.support_phone}`)));

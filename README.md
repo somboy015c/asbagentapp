@@ -7,7 +7,8 @@ Turns every ASBData agent store into its own **Android app**, fully automaticall
 - **Everything the app shows comes from the agent's Store Settings**: business name, tagline, logo,
   brand colours, hero / sign-in pictures, and every text block (hero, about, how it works, services,
   FAQ, call-to-action, footer, sign-in quotes), plus contact details and social links.
-- Buying data, paying, signing in, order history and **agent registration** all happen inside the app.
+- It contains **only what the agent's customers see on the store website**: buying data, paying, signing in,
+  orders, wallet/refunds and password change. There is nothing about agents, plans or the agent dashboard in it.
 - GitHub Actions builds a signed `.apk` per store and publishes it. The website's **Download App** button
   downloads it, and **Save Store Settings** on the website starts a rebuild.
 
@@ -62,7 +63,6 @@ never be updated; users would have to uninstall and reinstall.
 |---|---|
 | `API_BASE` | `https://api.asbdataghana.com/api/v1` |
 | `STORE_BASE_DOMAIN` | `asbdataghana.com` (the part after the store name, e.g. smekart.**asbdataghana.com**) |
-| `SITE_URL` | `https://asbdataghana.com` |
 | `RELEASE_TAG` | `agent-apps` |
 
 ### 4. Let the website start builds
@@ -80,10 +80,9 @@ GITHUB_APP_INPUT=subdomain
 then `php artisan config:clear`.
 
 ### 5. Deploy the website changes that came with this project
-The app needs three small backend changes (included in the update zip):
+The app needs two small backend changes (included in the update zip):
 - `config/cors.php` allows the app's origin (`https://localhost`). **Without this the app cannot talk to the API.**
 - `StorefrontController` also returns the store's full `domain`.
-- `PlanController` / `WalletController` also return the payment `reference`.
 
 ### 6. Add your onboarding pictures
 Put `slide-1.png`, `slide-2.png`, `slide-3.png` in `app/assets/onboarding/` (about 1000x1000 px). Until then the
@@ -105,8 +104,8 @@ Install it on an Android phone (allow "install unknown apps" for the browser) an
 | Buy | Network tabs, bundle grid, recipient number, checkout sheet (guest or signed in), Payaza / Korapay choice |
 | Payment | Opens the gateway's secure page **inside the app**, confirms on return, success animation; cancelled payments get a "Complete payment" button and the website emails the same link |
 | Orders | Account orders, or the orders placed on this phone for guests; tap for details; unpaid orders can be paid |
-| Account | Sign in / create account / forgot password for this store's customers, wallet balance, sign out |
-| Become an agent | Create account, choose and pay for a plan, business profile (name, store address, logo, region, MoMo), review status: all in the app |
+| Sign in / Register / Forgot password | Customer accounts of this store only (the API scopes accounts by store), with the store's own sign-in picture and quote |
+| Account (signed in) | Profile, wallet balance, refund history, change password, sign out; the same things the store website's customer dashboard offers |
 
 Colours, name, logo, icon and splash are baked in at build time; **text and pictures also refresh from the
 API every time the app opens**, so a change appears immediately; the rebuild (started by saving store settings)
@@ -117,7 +116,6 @@ is what updates the app name, icon, splash and colours.
   app and the app confirms the payment when you come back, but it is Chrome's secure window, not our own screen;
   gateways do not allow their pages inside another page.
 - **Email links** (verify email, reset password) open in the phone's browser, because they are links inside emails.
-- **Agent dashboard** (after approval) opens in the in-app browser; it is the website's existing dashboard.
 - Call, WhatsApp and email buttons hand over to the phone's own apps.
 
 ## Day-to-day
@@ -140,4 +138,4 @@ is what updates the app name, icon, splash and colours.
 ## Limits
 - Android only (an iOS build needs a Mac runner and Apple developer signing).
 - The build cannot be tested by the person who wrote it without GitHub's runners: run step 7 and use the
-  checklist (splash, onboarding, buy a small bundle with each gateway, cancel a payment, sign in, agent sign-up).
+  checklist (splash, onboarding, buy a small bundle with each gateway, cancel a payment, sign in, refund history).

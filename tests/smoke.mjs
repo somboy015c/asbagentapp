@@ -126,20 +126,13 @@ const routes = {
   'GET /settings/public': () => ({ guest_checkout_enabled: true, payment_gateways: [{ key: 'payaza', label: 'Payaza', min_amount: 0 }, { key: 'korapay', label: 'Korapay', min_amount: 10 }] }),
   'POST /orders/guest': (body) => ({ order: { id: 'uuid-1', amount: 22.5, status: 'pending_payment', created_at: new Date().toISOString() }, authorization_url: 'https://pay.example/x', reference: 'ORD-uuid-1', _body: body }),
   'GET /orders/guest/verify/ORD-uuid-1': () => ({ order: { id: 'uuid-1', status: 'delivered', network: 'MTN', bundle_size: '5GB', recipient_number: '0241234567', amount: 22.5 } }),
-  'GET /agent-plans': () => ({ data: [{ key: 'website', name: 'Basic', price: 150, features: ['Website'] }, { key: 'website_app', name: 'Pro', price: 350, features: ['Website', 'App'] }] }),
 };
-let agentStage = 'awaiting_payment';
-routes['GET /agent/onboarding/status'] = () => ({ stage: agentStage, plan: 'website', plan_details: { name: 'Basic', includes_custom_domain: false, includes_app: false }, business_name: 'Kofi Store', subdomain: 'kofi', storefront_url: agentStage === 'approved' ? 'https://kofi.asbdataghana.com' : null, rejection_reason: null });
-routes['POST /agent/plan'] = () => ({ authorization_url: 'https://pay.example/plan', reference: 'AGENTPLAN-1' });
-routes['GET /payments/confirm/AGENTPLAN-1'] = () => ({ status: 'success' });
-routes['GET /agent/onboarding/subdomain/generate'] = () => ({ value: 'kofi' });
-routes['GET /agent/onboarding/subdomain/check'] = () => ({ available: true });
 routes['POST /orders/payment/ORD-x/cancelled'] = () => ({ status: 'pending_payment', emailed: true, email: 'a***@mail.com' });
 routes['POST /orders/payment/ORD-x/resume'] = () => ({ order: { id: 'x' }, authorization_url: 'https://pay.example/again' });
 const calls = [];
 globalThis.fetch = async (url, options = {}) => {
   const base = 'https://api.test/api/v1';
-  if (String(url).endsWith('config.json')) return { ok: true, status: 200, json: async () => ({ apiBase: base, subdomain: 'smekart', siteUrl: 'https://asbdataghana.com', store: { ...storefront, logo_local: null } }) };
+  if (String(url).endsWith('config.json')) return { ok: true, status: 200, json: async () => ({ apiBase: base, subdomain: 'smekart', store: { ...storefront, logo_local: null } }) };
   const route = `${options.method || 'GET'} ${String(url).replace(base, '').split('?')[0]}`;
   calls.push(route);
   const handler = routes[route];
@@ -212,8 +205,7 @@ ok('payment confirmed -> success screen', textOf(document.body.querySelector('#s
 // Other screens render without throwing
 const { switchTab, go } = await import(pathToFileURL(path.join(ROOT, 'app/js/nav.js')));
 for (const name of ['orders', 'account']) { switchTab(name); await wait(150); ok(`${name} screen renders`, view.childNodes.length > 0); }
-for (const name of ['login', 'register', 'forgot', 'agent']) { go(name); await wait(250); ok(`${name} screen renders`, view.childNodes.length > 0); }
-ok('agent flow starts at account step', textOf(view).includes('Create account'));
+for (const name of ['login', 'register', 'forgot']) { go(name); await wait(250); ok(`${name} screen renders`, view.childNodes.length > 0); }
 
 
 // ---- cancelled payment: "Payment not completed", email note, and a fresh payment link
@@ -240,16 +232,29 @@ await wait(100);
 await byText(sheets(), 'Not now').click();
 ok('"Not now" ends the payment as cancelled', (await payment).status === 'cancelled');
 
-// ---- agent registration: resumes at the stage the server reports
 const { setSession } = await import(pathToFileURL(path.join(ROOT, 'app/js/state.js')));
-setSession('agent', 'tok', { name: 'Kofi' });
-for (const [stage, expected] of [['awaiting_payment', 'Choose your plan'], ['awaiting_business_profile', 'Tell us about your business'], ['awaiting_approval', 'Application submitted'], ['approved', "You're approved"]]) {
-  agentStage = stage;
-  switchTab('home'); go('agent'); await wait(300);
-  ok(`agent flow resumes at "${stage}"`, textOf(view).includes(expected));
-}
-ok('agent plan cards list the plans', (agentStage = 'awaiting_payment', switchTab('home'), go('agent'), await wait(300), textOf(view).includes('Pro') && textOf(view).includes('GH₵350.00')));
-void state;
+// ---- customer account: wallet, refund history, change password (what the store's own dashboard offers)
+routes['GET /wallet'] = () => ({ balance: 12.5 });
+routes['GET /wallet/transactions'] = () => ({ data: [{ id: 1, type: 'credit', amount: 5, description: 'Refund for failed order', created_at: new Date().toISOString() }] });
+routes['GET /me'] = () => ({ data: { id: 1, name: 'Ama Mensah', email: 'ama@example.com', phone: '0551234567', email_verified: true } });
+routes['POST /account/change-password'] = () => ({ message: 'Password updated.' });
+setSession('store', 'tok', { name: 'Ama Mensah', email: 'ama@example.com', phone: '0551234567', email_verified: true });
+switchTab('account'); await wait(300);
+ok('signed-in account shows refund history and change password', textOf(view).includes('Refund history') && textOf(view).includes('Change password'));
+ok('wallet balance is shown', textOf(view).includes('GH₵12.50'));
+await byText(view, 'Refund history').click(); await wait(300);
+ok('refund history lists the refund', textOf(sheets()).includes('Refund for failed order'));
+document.body.querySelector('#sheet-root').querySelectorAll('.icon-btn').forEach((b) => b.click());
+await wait(500);
+await byText(view, 'Change password').click(); await wait(200);
+ok('change-password sheet opens', textOf(sheets()).includes('Update password'));
+
+// ---- the app must contain nothing about agents (it is for the store's customers only)
+const everything = [view, sheets()].map(textOf).join(' ');
+switchTab('home'); await wait(200);
+ok('no "become an agent" / dashboard wording anywhere', !/become an agent|agent dashboard|your own data store|plan upgrade/i.test(everything + textOf(view)));
+const { readdirSync } = await import('node:fs');
+ok('there is no agent screen module', !readdirSync(path.join(ROOT, 'app/js')).includes('agent.js'));
 
 console.log(failures ? `\n${failures} FAILED` : '\nAll smoke checks passed');
 process.exit(failures ? 1 : 0);

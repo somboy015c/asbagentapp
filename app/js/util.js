@@ -160,7 +160,3 @@ export function confetti(colors) {
   setTimeout(() => layer.remove(), 4200);
 }
 
-export function debounce(fn, wait = 300) {
-  let timer;
-  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), wait); };
-}

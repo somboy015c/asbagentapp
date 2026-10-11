@@ -1,5 +1,5 @@
-// Tiny screen router: tab screens (Home / Buy / Orders / Account) and pushed screens (login, agent
-// flow...) that sit on a back stack. Screens are plain functions returning an element.
+// Tiny screen router: tab screens (Home / Buy / Orders / Account) and pushed screens (sign in,
+// register...) that sit on a back stack. Screens are plain functions returning an element.
 
 import { $, clear } from './util.js';
 

@@ -1,4 +1,4 @@
-// The whole "pay inside the app" journey, shared by data purchases and the agent plan payment.
+// The whole "pay inside the app" journey, used for every data purchase.
 //
 //   1. The gateway's secure page (Payaza / Korapay) opens in the in-app browser: the person never
 //      leaves the app, and card / MoMo details never touch the app itself.

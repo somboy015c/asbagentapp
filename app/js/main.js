@@ -14,7 +14,6 @@ import { buyScreen } from './buy.js';
 import { ordersScreen } from './orders.js';
 import { accountScreen } from './account.js';
 import { loginScreen, registerScreen, forgotScreen } from './auth.js';
-import { agentScreen } from './agent.js';
 
 // ---------------------------------------------------------------- theme
 function luminance(hex) {
@@ -112,7 +111,7 @@ async function boot() {
   renderSplash();
   hideNativeSplash();
 
-  registerScreens({ home: homeScreen, buy: buyScreen, orders: ordersScreen, account: accountScreen, login: loginScreen, register: registerScreen, forgot: forgotScreen, agent: agentScreen });
+  registerScreens({ home: homeScreen, buy: buyScreen, orders: ordersScreen, account: accountScreen, login: loginScreen, register: registerScreen, forgot: forgotScreen });
   buildNav();
   onBackButton(handleBack);
   on('session', () => { if (TABS.includes(currentScreen()?.name) && !hasSheet()) refresh(); });

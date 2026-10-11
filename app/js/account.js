@@ -1,9 +1,9 @@
 // Account tab: profile + wallet for signed-in customers, sign-in prompt for everyone else.
 
 import { api } from './api.js';
-import { h, icon, money, initials } from './util.js';
+import { h, icon, money, initials, fmtDate } from './util.js';
 import { clearSession, getSession, setSession, state, store } from './state.js';
-import { confirmSheet, toast } from './ui.js';
+import { confirmSheet, field, openSheet, setLoading, toast } from './ui.js';
 import { go, refresh, switchTab } from './nav.js';
 
 export function accountScreen() {
@@ -38,6 +38,8 @@ export function accountScreen() {
       verify,
       h('div', { class: 'card rise row spread', style: { '--i': '1' } }, h('div', {}, h('span', { class: 'muted', style: { fontSize: '13px' } }, 'Wallet balance'), h('div', {}, balance), h('span', { class: 'muted', style: { fontSize: '12px' } }, 'Refunds from failed orders land here')), h('div', { style: { color: 'var(--primary)' } }, icon('wallet', 34))),
       menuRow('orders', 'My orders', () => switchTab('orders')),
+      menuRow('wallet', 'Refund history', openWalletHistory, 'Money returned to your wallet'),
+      menuRow('lock', 'Change password', openChangePassword),
       h('button', { class: 'btn outline block', onclick: async () => {
         if (!(await confirmSheet({ title: 'Sign out?', message: 'You can sign back in any time.', confirmText: 'Sign out' }))) return;
         await api('/auth/logout', { method: 'POST' });
@@ -51,7 +53,6 @@ export function accountScreen() {
   }
 
   body.append(
-    h('div', { class: 'section', style: { padding: '8px 0 0' } }, menuRow('store', 'Start your own data store', () => go('agent'), 'Become an agent, with your own app')),
     h('div', { class: 'foot', style: { padding: '18px 0 8px' } },
       h('p', {}, s.business_name || ''),
       h('p', { style: { marginTop: '4px' } }, `App version built ${state.cfg?.builtAt ? new Date(state.cfg.builtAt).toLocaleDateString() : ''}`)));
@@ -63,4 +64,36 @@ function menuRow(iconName, title, onClick, sub) {
     h('div', { class: 'feature', style: { padding: 0 } }, h('div', { class: 'ico' }, icon(iconName, 22))),
     h('div', { style: { flex: 1 } }, h('b', {}, title), sub ? h('small', { class: 'muted', style: { display: 'block' } }, sub) : null),
     icon('right', 18));
+}
+
+// Same two extras the store website's own dashboard offers: refund history and change password.
+async function openWalletHistory() {
+  const list = h('div', {}, h('div', { class: 'skeleton', style: { height: '64px' } }));
+  openSheet({ title: 'Refund history', content: list });
+  const res = await api('/wallet/transactions');
+  const items = res.ok ? (res.data?.data || []) : [];
+  list.replaceChildren(...(items.length
+    ? items.map((t) => h('div', { class: 'kv' },
+      h('div', {}, h('b', {}, t.description), h('small', { class: 'muted', style: { display: 'block' } }, fmtDate(t.created_at))),
+      h('b', { style: { color: t.type === 'credit' ? 'var(--ok)' : 'var(--bad)' } }, `${t.type === 'credit' ? '+' : '-'}${money(t.amount)}`)))
+    : [h('p', { class: 'muted center', style: { padding: '24px 0' } }, res.ok ? 'No refunds yet.' : res.error)]));
+}
+
+function openChangePassword() {
+  const current = field({ label: 'Current password', type: 'password', autocomplete: 'current-password' });
+  const next = field({ label: 'New password (8+ characters)', type: 'password', autocomplete: 'new-password' });
+  const confirm = field({ label: 'Confirm new password', type: 'password', autocomplete: 'new-password' });
+  const button = h('button', { class: 'btn primary lg block' }, 'Update password');
+  const sheet = openSheet({ title: 'Change password', content: h('div', { class: 'stack' }, current.el, next.el, confirm.el, button) });
+  button.addEventListener('click', async () => {
+    if (!current.input.value) return toast('Enter your current password', 'bad');
+    if (next.input.value.length < 8) return toast('The new password must be at least 8 characters', 'bad');
+    if (next.input.value !== confirm.input.value) return toast("The new passwords don't match", 'bad');
+    setLoading(button, true, 'Updating');
+    const res = await api('/account/change-password', { method: 'POST', body: { current_password: current.input.value, password: next.input.value, password_confirmation: confirm.input.value } });
+    setLoading(button, false);
+    toast(res.ok ? (res.data?.message || 'Password updated') : res.error, res.ok ? 'ok' : 'bad');
+    if (res.ok) sheet.close();
+    return undefined;
+  });
 }

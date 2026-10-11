@@ -54,7 +54,7 @@ export function imageSources(kind) { // 'logo' | 'hero' | 'auth'
   return { src: live || baked, fallback: baked };
 }
 
-// ---- Sessions: 'store' = this store's customer account, 'agent' = main-site account used to become an agent ----
+// ---- Session: the signed-in customer of THIS store (accounts belong to one store only) ----
 export const getSession = (kind = 'store') => ls.get(`session_${kind}`);
 export function setSession(kind, token, user) { ls.set(`session_${kind}`, { token, user }); emit('session', { kind }); }
 export function clearSession(kind = 'store') { ls.del(`session_${kind}`); emit('session', { kind }); }

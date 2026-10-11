@@ -18,7 +18,6 @@ import sharp from 'sharp';
 const SUB = String(process.env.APP_SUB || '').toLowerCase().trim();
 const API_BASE = String(process.env.API_BASE || 'https://api.asbdataghana.com/api/v1').replace(/\/+$/, '');
 const STORE_BASE_DOMAIN = String(process.env.STORE_BASE_DOMAIN || 'asbdataghana.com').replace(/^\.+/, '');
-const SITE_URL = String(process.env.SITE_URL || 'https://asbdataghana.com').replace(/\/+$/, '');
 const ROOT = process.cwd();
 
 const JAVA_WORDS = new Set(['abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extends', 'final', 'finally', 'float', 'for', 'goto', 'if', 'implements', 'import', 'instanceof', 'int', 'interface', 'long', 'native', 'new', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'strictfp', 'super', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'try', 'void', 'volatile', 'while', 'true', 'false', 'null']);
@@ -139,7 +138,6 @@ async function main() {
   // The same shape the API returns, plus local copies of the images (used until the live refresh answers).
   const baked = {
     apiBase: API_BASE,
-    siteUrl: SITE_URL,
     subdomain: SUB,
     builtAt: new Date().toISOString(),
     store: {
