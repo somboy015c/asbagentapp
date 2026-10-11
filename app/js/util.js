@@ -169,3 +169,22 @@ export function networkColor(name) {
   if (n.includes('airtel') || n.includes('tigo')) return { bg: '#0B4FA8', fg: '#ffffff' };
   return { bg: 'var(--primary)', fg: 'var(--on-primary)' };
 }
+
+/** Brand look of each network's plan cards: MTN yellow, Telecel red, AirtelTigo blue with a red accent. Anything else uses the store's colour. */
+export function networkTheme(name) {
+  const n = String(name || '').toLowerCase();
+  if (n.includes('mtn')) return { key: 'mtn', c1: '#FFD21F', c2: '#FFB300', ink: '#1b1500', pillBg: '#1b1500', pillFg: '#FFD21F', deco: 'rgba(27, 21, 0, .07)', chip: 'rgba(27, 21, 0, .10)' };
+  if (n.includes('telecel') || n.includes('vodafone')) return { key: 'telecel', c1: '#F0141E', c2: '#B00010', ink: '#ffffff', pillBg: '#ffffff', pillFg: '#C60012', deco: 'rgba(255, 255, 255, .14)', chip: 'rgba(255, 255, 255, .18)' };
+  if (n.includes('airtel') || n.includes('tigo') || n === 'at') return { key: 'airtel', c1: '#1556C5', c2: '#0A2E7A', ink: '#ffffff', pillBg: '#E4002B', pillFg: '#ffffff', deco: 'rgba(255, 255, 255, .12)', chip: 'rgba(255, 255, 255, .18)' };
+  return { key: 'other', c1: 'var(--primary)', c2: 'var(--primary-deep)', ink: 'var(--on-primary)', pillBg: '#ffffff', pillFg: 'var(--primary-deep)', deco: 'rgba(255, 255, 255, .14)', chip: 'rgba(255, 255, 255, .18)' };
+}
+
+export function applyNetworkTheme(el, theme) {
+  el.style.setProperty('--c1', theme.c1);
+  el.style.setProperty('--c2', theme.c2);
+  el.style.setProperty('--ink', theme.ink);
+  el.style.setProperty('--pill-bg', theme.pillBg);
+  el.style.setProperty('--pill-fg', theme.pillFg);
+  el.style.setProperty('--deco', theme.deco);
+  el.style.setProperty('--chip', theme.chip);
+}

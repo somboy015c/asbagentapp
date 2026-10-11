@@ -2,7 +2,7 @@
 // Then the in-app payment screen takes over (see pay.js).
 
 import { api, storeDomain, publicSettings, gatewaysFor } from './api.js';
-import { h, icon, money, cleanNumber, validNumber, networkColor } from './util.js';
+import { h, icon, money, cleanNumber, validNumber, networkTheme, applyNetworkTheme } from './util.js';
 import { getSession, ls, rememberOrder } from './state.js';
 import { openSheet, segmented, field, setLoading, toast } from './ui.js';
 import { go, switchTab } from './nav.js';
@@ -27,7 +27,7 @@ export async function openPurchase({ bundle, network }) {
   const gateways = await gatewaysFor(bundle.price);
   let gateway = gateways[0]?.key || null;
   const saved = lastBuyer();
-  const color = networkColor(network.name);
+  const theme = networkTheme(network.name);
 
   const number = field({ label: 'Recipient number', type: 'tel', inputmode: 'numeric', maxlength: 14, value: saved.number || '', hint: 'The number that will receive the data' });
   const firstName = field({ label: 'First name', autocomplete: 'given-name', value: saved.first || '' });
@@ -39,9 +39,9 @@ export async function openPurchase({ bundle, network }) {
   const needsAccount = !user && !guestAllowed;
 
   const head = h('div', { class: 'buyhead' },
-    h('div', { class: 'netdot', style: { background: color.bg, color: color.fg } }, String(network.name).slice(0, 2).toUpperCase()),
-    h('div', { style: { flex: 1 } }, h('b', { style: { fontSize: '20px', display: 'block' } }, `${network.name} ${bundle.size_label}`), h('small', { class: 'muted' }, 'Data bundle')),
-    h('b', { style: { fontSize: '20px', color: 'var(--primary)' } }, money(bundle.price)));
+    h('div', { style: { flex: 1 } }, h('span', { class: 'pc-net' }, network.name), h('b', { class: 'bh-size' }, bundle.size_label), h('small', { class: 'pc-sub' }, 'Data bundle')),
+    h('span', { class: 'bh-price' }, money(bundle.price)));
+  applyNetworkTheme(head, theme);
 
   const parts = [head];
   if (needsAccount) {

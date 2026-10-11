@@ -2,7 +2,7 @@
 // Names, colours and the logo come from the agent's Store Settings; nothing else is shown here.
 
 import { api } from './api.js';
-import { h, icon, money, networkColor, vibrate } from './util.js';
+import { h, icon, money, networkColor, networkTheme, applyNetworkTheme, vibrate } from './util.js';
 import { getSession, store } from './state.js';
 import { logoTile, openSheet, toast } from './ui.js';
 import { go, switchTab } from './nav.js';
@@ -21,7 +21,7 @@ export function homeScreen() {
   const balance = h('b', { class: 'bal' }, money(0));
   const plans = h('div', { class: 'plangrid' });
   const tabs = h('div', { class: 'nettabs' });
-  const plansTitle = h('div', { class: 'plans-title' }, h('h3', {}, 'Data plans'));
+  const plansTitle = h('div', { class: 'plans-title' }, h('h3', {}, 'Data plans'), h('small', {}, 'Tap a plan to buy'));
 
   const header = h('header', { class: 'vtu-head' },
     h('div', { class: 'vtu-top' },
@@ -64,16 +64,17 @@ export function homeScreen() {
       bundles = res.data?.data || [];
       bundleCache.set(network.id, bundles);
     }
-    const color = networkColor(network.name);
-    plans.style.setProperty('--nc', color.bg);
+    applyNetworkTheme(plans, networkTheme(network.name));
+    plans.dataset.net = networkTheme(network.name).key;
     if (!bundles.length) {
       plans.replaceChildren(h('p', { class: 'muted center', style: { gridColumn: '1 / -1', padding: '30px 0' } }, 'No plans available for this network right now.'));
       return;
     }
     plans.replaceChildren(...bundles.map((bundle, i) => h('button', { class: 'plan-card pop', style: { '--i': String(Math.min(i, 10)) }, onclick: () => { vibrate(10); openPurchase({ bundle, network }); } },
-      h('b', {}, bundle.size_label),
-      h('span', {}, money(bundle.price)),
-      h('i', { class: 'go', style: { background: color.bg, color: color.fg } }, icon('right', 16)))));
+      h('span', { class: 'pc-net' }, network.name),
+      h('b', { class: 'pc-size' }, bundle.size_label),
+      h('small', { class: 'pc-sub' }, 'Data bundle'),
+      h('div', { class: 'pc-foot' }, h('span', { class: 'pc-price' }, money(bundle.price)), h('i', { class: 'pc-go' }, icon('right', 16))))));
   }
 
   loadNetworks().then((list) => {
