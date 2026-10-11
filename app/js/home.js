@@ -1,122 +1,113 @@
-// Home: every word, colour and picture on this screen comes from the agent's Store Settings
-// (hero, about, how it works, services, FAQ, call-to-action, contact details, social links).
+// Home, VTU-app style: a small header, four quick buttons, then the data plans with a tab per network.
+// Names, colours and the logo come from the agent's Store Settings; nothing else is shown here.
 
 import { api } from './api.js';
-import { h, icon, cycleIcon, vibrate } from './util.js';
+import { h, icon, money, networkColor, vibrate } from './util.js';
 import { getSession, store } from './state.js';
-import { logoTile, storeImage } from './ui.js';
+import { logoTile, openSheet, toast } from './ui.js';
 import { go, switchTab } from './nav.js';
 import { openExternal, openInApp } from './native.js';
+import { loadNetworks, openPurchase } from './buy.js';
+import { openWalletHistory } from './account.js';
 
-const section = (eyebrow, title, lead) => h('div', {},
-  eyebrow ? h('div', { class: 'eyebrow' }, eyebrow) : null,
-  title ? h('h2', { class: 'h2' }, title) : null,
-  lead ? h('p', { class: 'lead' }, lead) : null);
+let activeNetworkId = null;           // remembered while the app is open
+const bundleCache = new Map();        // network id -> bundles
 
 export function homeScreen() {
   const s = store();
-  const c = s.content || {};
-  const hero = c.hero || {};
-  const signedIn = !!getSession('store');
-  const root = h('div', {});
+  const user = getSession('store')?.user;
+  const first = String(user?.name || '').split(' ')[0];
 
-  // ---------------- Hero ----------------
-  const heroImg = storeImage('hero', { alt: '' });
-  root.append(h('header', { class: 'hero' },
-    h('div', { class: 'blob a' }), h('div', { class: 'blob b' }),
-    h('div', { class: 'brandrow rise' },
+  const balance = h('b', { class: 'bal' }, money(0));
+  const plans = h('div', { class: 'plangrid' });
+  const tabs = h('div', { class: 'nettabs' });
+  const plansTitle = h('div', { class: 'plans-title' }, h('h3', {}, 'Data plans'));
+
+  const header = h('header', { class: 'vtu-head' },
+    h('div', { class: 'vtu-top' },
       logoTile(),
-      h('div', {}, h('strong', {}, s.business_name || ''), h('span', {}, s.store_tagline || ''))),
-    hero.eyebrow ? h('div', { class: 'badge rise', style: { '--i': '1' } }, icon('bolt', 15), hero.eyebrow) : null,
-    h('h2', { class: 'rise', style: { '--i': '2' } }, hero.h1 || s.business_name),
-    hero.p ? h('p', { class: 't rise', style: { '--i': '3' } }, hero.p) : null,
-    h('div', { class: 'cta rise', style: { '--i': '4' } },
-      h('button', { class: 'btn white lg', onclick: () => switchTab('buy') }, icon('bolt', 20), 'Buy data now'),
-      signedIn
-        ? h('button', { class: 'btn ghost lg', onclick: () => switchTab('orders') }, 'My orders')
-        : h('button', { class: 'btn ghost lg', onclick: () => go('login') }, hero.secondaryCtaText || 'Sign in')),
-    heroImg ? h('div', { class: 'hero-img rise', style: { '--i': '5' } }, heroImg) : null,
-    (hero.trustPoints || []).length
-      ? h('div', { class: 'trust rise', style: { '--i': '6' } }, hero.trustPoints.map((t) => h('span', {}, icon('check', 14), t)))
-      : null,
-    hero.floatingCardValue
-      ? h('div', { class: 'trust rise', style: { '--i': '7', marginTop: '12px' } }, h('span', {}, icon('card', 14), `${hero.floatingCardLabel || 'Payment'}: ${hero.floatingCardValue}`), hero.floatingBadgeText ? h('span', {}, icon('shield', 14), hero.floatingBadgeText) : null)
-      : null));
+      h('div', { style: { flex: 1, minWidth: 0 } }, h('strong', {}, s.business_name || ''), h('span', {}, s.store_tagline || '')),
+      h('button', { class: 'icon-btn', 'aria-label': 'Support', style: { color: 'var(--on-primary)' }, onclick: () => openSupport() }, icon('chat', 24))),
+    h('p', { class: 'greet' }, user ? `Hi, ${first || 'there'} \u{1F44B}` : 'Welcome \u{1F44B}'),
+    user
+      ? h('div', { class: 'balcard' }, h('div', {}, h('small', {}, 'Wallet balance'), h('div', {}, balance)), h('div', { class: 'balico' }, icon('wallet', 26)))
+      : h('p', { class: 'greet-sub' }, 'Buy data in seconds. No account needed.'));
 
-  // ---------------- Networks quick pick ----------------
-  const netBox = h('div', { class: 'hscroll' });
-  root.append(h('div', { class: 'section' }, section(null, 'Buy for any network'), h('div', { class: 'mt' }, netBox)));
-  api('/networks', { session: null }).then((res) => {
-    const list = res.ok ? (res.data?.data || []) : [];
-    if (!list.length) { netBox.closest('.section')?.remove(); return; }
-    list.forEach((n, i) => netBox.append(h('button', { class: 'netcard pop', style: { '--i': String(i) }, onclick: () => { vibrate(); switchTab('buy', { networkId: n.id }); } },
-      h('div', { class: 'dot' }, String(n.name).slice(0, 2).toUpperCase()), h('b', {}, n.name), h('small', {}, n.tag || 'Tap to see bundles'))));
+  const quick = h('div', { class: 'quickcard' },
+    quickButton('bolt', 'Buy data', () => plansTitle.scrollIntoView({ behavior: 'smooth', block: 'start' })),
+    quickButton('orders', 'Orders', () => switchTab('orders')),
+    quickButton('wallet', user ? 'Refunds' : 'Sign in', () => (user ? openWalletHistory() : go('login'))),
+    quickButton('chat', 'Support', () => openSupport()));
+
+  const root = h('div', {}, header, quick, h('section', { class: 'plans-wrap' }, plansTitle, tabs, plans));
+
+  // ---- wallet balance (signed-in customers) ----
+  if (user) api('/wallet').then((res) => { if (res.ok) balance.textContent = money(res.data.balance); });
+
+  // ---- network tabs + plans ----
+  function drawSkeleton(count = 6) {
+    plans.replaceChildren(...Array.from({ length: count }, () => h('div', { class: 'skeleton', style: { height: '84px' } })));
+  }
+
+  async function showNetwork(network, list) {
+    activeNetworkId = network.id;
+    [...tabs.children].forEach((el) => el.classList.toggle('on', el.dataset.id === String(network.id)));
+    let bundles = bundleCache.get(network.id);
+    if (!bundles) {
+      drawSkeleton();
+      const res = await api(`/networks/${network.id}/bundles`, { session: null });
+      if (activeNetworkId !== network.id) return; // switched tab while loading
+      if (!res.ok) {
+        plans.replaceChildren(h('div', { class: 'empty', style: { gridColumn: '1 / -1', padding: '30px 10px' } }, h('p', {}, res.error), h('button', { class: 'btn tonal', onclick: () => showNetwork(network, list) }, 'Try again')));
+        return;
+      }
+      bundles = res.data?.data || [];
+      bundleCache.set(network.id, bundles);
+    }
+    const color = networkColor(network.name);
+    plans.style.setProperty('--nc', color.bg);
+    if (!bundles.length) {
+      plans.replaceChildren(h('p', { class: 'muted center', style: { gridColumn: '1 / -1', padding: '30px 0' } }, 'No plans available for this network right now.'));
+      return;
+    }
+    plans.replaceChildren(...bundles.map((bundle, i) => h('button', { class: 'plan-card pop', style: { '--i': String(Math.min(i, 10)) }, onclick: () => { vibrate(10); openPurchase({ bundle, network }); } },
+      h('b', {}, bundle.size_label),
+      h('span', {}, money(bundle.price)),
+      h('i', { class: 'go', style: { background: color.bg, color: color.fg } }, icon('right', 16)))));
+  }
+
+  loadNetworks().then((list) => {
+    if (!list || !list.length) {
+      tabs.remove();
+      plans.replaceChildren(h('div', { class: 'empty', style: { gridColumn: '1 / -1' } }, h('div', { class: 'art' }, icon('wifi', 42)), h('h3', {}, 'Could not load plans'), h('p', {}, 'Check your connection and try again.'), h('button', { class: 'btn primary', onclick: () => switchTab('home') }, 'Try again')));
+      return;
+    }
+    list.forEach((network) => {
+      const color = networkColor(network.name);
+      tabs.append(h('button', { class: 'nettab', dataset: { id: String(network.id) }, style: { '--nc': color.bg, '--nf': color.fg }, onclick: () => { vibrate(8); showNetwork(network, list); } }, h('i', { class: 'dot' }), network.name));
+    });
+    showNetwork(list.find((n) => n.id === activeNetworkId) || list[0], list);
   });
 
-  // ---------------- About ----------------
-  if (c.about) {
-    root.append(h('div', { class: 'section' },
-      section(c.about.eyebrow, c.about.h2, c.about.p),
-      h('div', { class: 'mt' }, (c.about.features || []).map((f, i) => h('div', { class: 'feature rise', style: { '--i': String(i) } },
-        h('div', { class: 'ico' }, cycleIcon(i)), h('div', {}, h('h4', {}, f.title), h('p', {}, f.text)))))));
-  }
-
-  // ---------------- How it works ----------------
-  if (c.howItWorks?.steps?.length) {
-    root.append(h('div', { class: 'section' },
-      section(c.howItWorks.eyebrow, c.howItWorks.h2),
-      h('div', { class: 'mt2' }, c.howItWorks.steps.map((step, i) => h('div', { class: 'step rise', style: { '--i': String(i) } },
-        h('div', { class: 'n' }, String(i + 1)), h('div', {}, h('h4', {}, step.title), h('p', {}, step.text)))))));
-  }
-
-  // ---------------- Services ----------------
-  if (c.services?.items?.length) {
-    root.append(h('div', { class: 'section' },
-      section(c.services.eyebrow, c.services.h2, c.services.p),
-      h('div', { class: 'grid2 mt' }, c.services.items.map((item, i) => h('div', { class: 'card pop', style: { '--i': String(i), padding: '16px' } },
-        h('div', { class: 'ico', style: { width: '40px', height: '40px', borderRadius: '13px', background: 'var(--tint)', color: 'var(--primary)', display: 'grid', placeItems: 'center', marginBottom: '10px' } }, cycleIcon(i + 2, 20)),
-        h('h4', { style: { fontSize: '15px' } }, item.title),
-        h('p', { class: 'muted', style: { fontSize: '13px', marginTop: '4px' } }, item.text))))));
-  }
-
-  // ---------------- FAQ ----------------
-  if (c.faq?.items?.length) {
-    root.append(h('div', { class: 'section' },
-      section(c.faq.eyebrow, c.faq.h2),
-      h('div', { class: 'mt' }, c.faq.items.map((item) => {
-        const box = h('div', { class: 'faq' },
-          h('button', { class: 'q', onclick: () => box.classList.toggle('open') }, h('span', {}, item.q), h('span', { class: 'chev' }, icon('down', 20))),
-          h('div', { class: 'a' }, h('div', {}, h('p', {}, item.a))));
-        return box;
-      }))));
-  }
-
-  // ---------------- Call to action ----------------
-  if (c.cta) {
-    root.append(h('div', { class: 'cta-card' },
-      h('div', { class: 'blob' }),
-      h('h3', {}, c.cta.h2),
-      c.cta.p ? h('p', {}, c.cta.p) : null,
-      h('button', { class: 'btn white', onclick: () => (signedIn ? switchTab('buy') : go('register')) }, signedIn ? 'Buy data now' : (c.cta.buttonText || 'Get started'))));
-  }
-
-  // ---------------- Contact ----------------
-  const rows = [];
-  if (s.support_phone) rows.push(contactRow('phone', 'Call us', s.support_phone, () => openExternal(`tel:${s.support_phone}`)));
-  if (s.whatsapp_number) rows.push(contactRow('chat', 'WhatsApp', s.whatsapp_number, () => openExternal(`https://wa.me/${String(s.whatsapp_number).replace(/[^\d]/g, '')}`)));
-  if (s.support_email) rows.push(contactRow('mail', 'Email', s.support_email, () => openExternal(`mailto:${s.support_email}`)));
-  Object.entries(s.socials || {}).filter(([, url]) => url).forEach(([name, url]) => rows.push(contactRow('globe', name.charAt(0).toUpperCase() + name.slice(1), url.replace(/^https?:\/\/(www\.)?/, ''), () => openInApp(url))));
-  if (rows.length) root.append(h('div', { class: 'section' }, section('Get in touch', 'Need help?'), h('div', { class: 'card mt', style: { padding: '4px 16px' } }, rows)));
-
-  root.append(h('div', { class: 'foot' },
-    c.footer?.description ? h('p', { style: { marginBottom: '8px' } }, c.footer.description) : null,
-    h('p', {}, `\u00a9 ${new Date().getFullYear()} ${s.business_name || ''}`)));
   return root;
 }
 
-function contactRow(iconName, title, value, onClick) {
-  return h('button', { class: 'contact-row ripple', onclick: onClick },
+function quickButton(iconName, label, onClick) {
+  return h('button', { class: 'q ripple', onclick: onClick }, h('span', { class: 'qi' }, icon(iconName, 24)), h('small', {}, label));
+}
+
+/** Support details the agent entered in Store Settings (phone, WhatsApp, email, social links). Shown only on request. */
+function openSupport() {
+  const s = store();
+  const rows = [];
+  const row = (iconName, title, value, action) => h('button', { class: 'contact-row ripple', onclick: action },
     h('div', { class: 'ico' }, icon(iconName, 20)),
     h('div', { style: { flex: 1, minWidth: 0 } }, h('b', {}, title), h('small', { style: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, value)),
     icon('right', 18));
+  if (s.support_phone) rows.push(row('phone', 'Call us', s.support_phone, () => openExternal(`tel:${s.support_phone}`)));
+  if (s.whatsapp_number) rows.push(row('chat', 'WhatsApp', s.whatsapp_number, () => openExternal(`https://wa.me/${String(s.whatsapp_number).replace(/[^\d]/g, '')}`)));
+  if (s.support_email) rows.push(row('mail', 'Email', s.support_email, () => openExternal(`mailto:${s.support_email}`)));
+  Object.entries(s.socials || {}).filter(([, url]) => url).forEach(([name, url]) => rows.push(row('globe', name.charAt(0).toUpperCase() + name.slice(1), String(url).replace(/^https?:\/\/(www\.)?/, ''), () => openInApp(url))));
+  if (!rows.length) { toast('Support details are not available yet.'); return; }
+  openSheet({ title: 'Support', content: h('div', {}, rows) });
 }

@@ -178,25 +178,25 @@ await byText(onboarding, 'Next').click();
 await byText(onboarding, 'Get started').click();
 await wait(500);
 const view = document.body.querySelector('#view');
-ok('home screen shown after onboarding', textOf(view).includes("Kwame's Data") && textOf(view).includes('Buy data now'));
-ok('home shows store FAQ + contact', textOf(view).includes('Common questions') && textOf(view).includes('0241234567'));
-ok('nav has 4 tabs', document.body.querySelectorAll('#nav button').length === 4);
+ok('home screen shown after onboarding', textOf(view).includes("Kwame's Data") && textOf(view).includes('Buy data'));
+ok('nav has 3 tabs', document.body.querySelectorAll('#nav button').length === 3);
+ok('home is compact: header, quick buttons, plans', textOf(view).includes('Data plans') && textOf(view).includes('Orders') && textOf(view).includes('Support') && textOf(view).includes('Buy data'));
+ok('home shows no marketing sections', !/Common questions|Up and running|Built for speed|Ready to get started/i.test(textOf(view)));
+await wait(300);
+ok('network tabs are listed', view.querySelectorAll('.nettab').length === 2 && textOf(view).includes('MTN') && textOf(view).includes('Telecel'));
+ok('plans of the first network are listed', textOf(view).includes('5GB') && textOf(view).includes('GH₵22.50'));
+await view.querySelectorAll('.nettab')[1].click(); await wait(200);
+ok('switching network tab loads its plans', textOf(view).includes('5GB'));
 
-// Buy flow
-await document.body.querySelectorAll('#nav button')[1].click();
-await wait(200);
-ok('buy screen lists bundles', textOf(view).includes('5GB') && textOf(view).includes('GH₵22.50'));
+// Purchase: tap a plan -> one sheet -> pay
 await byText(view, '5GB').click();
-const number = view.querySelectorAll('input').find((i) => i.attrs.type === 'tel');
-number.value = '0241234567'; await number.fire('input');
-await byText(view, 'Continue').click();
-await wait(200);
+await wait(250);
 const sheet = document.body.querySelector('#sheet-root');
-ok('checkout sheet opens with the warning', textOf(sheet).includes('cannot be undone'));
+ok('purchase sheet opens with the number warning', textOf(sheet).includes('cannot be undone'));
 ok('both gateways offered above GH₵10', textOf(sheet).includes('Payaza') && textOf(sheet).includes('Korapay'));
 const inputs = sheet.querySelectorAll('input');
 const setVal = (i, v) => { inputs[i].value = v; };
-setVal(0, 'Ama'); setVal(1, 'Mensah'); setVal(2, 'ama@example.com'); setVal(3, '0551234567');
+setVal(0, '0241234567'); setVal(1, 'Ama'); setVal(2, 'Mensah'); setVal(3, 'ama@example.com');
 await byText(sheet, 'Pay GH₵22.50').click();
 await wait(400);
 ok('order created through the guest endpoint', calls.includes('POST /orders/guest'));

@@ -160,3 +160,12 @@ export function confetti(colors) {
   setTimeout(() => layer.remove(), 4200);
 }
 
+
+/** Brand colour of a network for its tab/chip: MTN yellow, Telecel red, AirtelTigo blue; anything else uses the store colour. */
+export function networkColor(name) {
+  const n = String(name || '').toLowerCase();
+  if (n.includes('mtn')) return { bg: '#FFCC00', fg: '#2b2300' };
+  if (n.includes('telecel') || n.includes('vodafone')) return { bg: '#E60000', fg: '#ffffff' };
+  if (n.includes('airtel') || n.includes('tigo')) return { bg: '#0B4FA8', fg: '#ffffff' };
+  return { bg: 'var(--primary)', fg: 'var(--on-primary)' };
+}

@@ -2,11 +2,11 @@
 
 Turns every ASBData agent store into its own **Android app**, fully automatically.
 
-- The app is a Capacitor app with a Flutter-style (Material 3) interface: animated splash screen,
-  3-slide onboarding, bottom navigation, bottom sheets, smooth transitions.
-- **Everything the app shows comes from the agent's Store Settings**: business name, tagline, logo,
-  brand colours, hero / sign-in pictures, and every text block (hero, about, how it works, services,
-  FAQ, call-to-action, footer, sign-in quotes), plus contact details and social links.
+- The app is a Capacitor app with a clean, native-feeling VTU-style interface (Material 3): animated splash screen,
+  3-slide onboarding, a compact home with plans per network, bottom navigation, bottom sheets, smooth transitions.
+- **The look and names come from the agent's Store Settings**: business name, tagline, logo, brand colours,
+  sign-in picture and quotes, onboarding text, and the support contact details. The app deliberately stays
+  minimal (no marketing sections): just the plans, orders and account.
 - It contains **only what the agent's customers see on the store website**: buying data, paying, signing in,
   orders, wallet/refunds and password change. There is nothing about agents, plans or the agent dashboard in it.
 - GitHub Actions builds a signed `.apk` per store and publishes it. The website's **Download App** button
@@ -101,8 +101,7 @@ Install it on an Android phone (allow "install unknown apps" for the browser) an
 |---|---|
 | Splash | Store logo tile + name + tagline on the brand colour (matches the native splash) |
 | Onboarding | 3 swipeable slides; words from the store's hero / services / call-to-action text; shown once |
-| Home | Hero, networks, about + features, how it works, services, FAQ, call-to-action, contact + socials, all from store settings |
-| Buy | Network tabs, bundle grid, recipient number, checkout sheet (guest or signed in), Payaza / Korapay choice |
+| Home | Like a typical VTU app: small header (logo, name, wallet balance), four quick buttons (Buy data, Orders, Refunds/Sign in, Support) and the data plans with a tab per network (MTN, Telecel, AirtelTigo...). Tap a plan, enter the number, pay |
 | Payment | A payment screen built for it: our header and footer around the gateway's page shown **inline** (no browser), confirms by itself, success animation; cancelled payments get a "Complete payment" button and the website emails the same link |
 | Orders | Account orders, or the orders placed on this phone for guests; tap for details; unpaid orders can be paid |
 | Sign in / Register / Forgot password | Customer accounts of this store only (the API scopes accounts by store), with the store's own sign-in picture and quote |

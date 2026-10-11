@@ -37,7 +37,6 @@ export function accountScreen() {
         h('div', { style: { minWidth: 0 } }, h('b', { style: { fontSize: '18px', display: 'block' } }, user.name || 'Customer'), h('span', { class: 'muted', style: { fontSize: '13px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis' } }, user.email), h('span', { class: 'muted', style: { fontSize: '13px' } }, user.phone))),
       verify,
       h('div', { class: 'card rise row spread', style: { '--i': '1' } }, h('div', {}, h('span', { class: 'muted', style: { fontSize: '13px' } }, 'Wallet balance'), h('div', {}, balance), h('span', { class: 'muted', style: { fontSize: '12px' } }, 'Refunds from failed orders land here')), h('div', { style: { color: 'var(--primary)' } }, icon('wallet', 34))),
-      menuRow('orders', 'My orders', () => switchTab('orders')),
       menuRow('wallet', 'Refund history', openWalletHistory, 'Money returned to your wallet'),
       menuRow('lock', 'Change password', openChangePassword),
       h('button', { class: 'btn outline block', onclick: async () => {
@@ -67,7 +66,7 @@ function menuRow(iconName, title, onClick, sub) {
 }
 
 // Same two extras the store website's own dashboard offers: refund history and change password.
-async function openWalletHistory() {
+export async function openWalletHistory() {
   const list = h('div', {}, h('div', { class: 'skeleton', style: { height: '64px' } }));
   openSheet({ title: 'Refund history', content: list });
   const res = await api('/wallet/transactions');

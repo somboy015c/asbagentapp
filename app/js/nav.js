@@ -1,10 +1,10 @@
-// Tiny screen router: tab screens (Home / Buy / Orders / Account) and pushed screens (sign in,
+// Tiny screen router: tab screens (Home / Orders / Account) and pushed screens (sign in,
 // register...) that sit on a back stack. Screens are plain functions returning an element.
 
 import { $, clear } from './util.js';
 
 const screens = {};
-export const TABS = ['home', 'buy', 'orders', 'account'];
+export const TABS = ['home', 'orders', 'account'];
 let current = null;
 const stack = [];
 

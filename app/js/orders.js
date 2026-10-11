@@ -126,7 +126,7 @@ export function ordersScreen() {
         h('div', { class: 'art' }, icon('orders', 42)),
         h('h3', {}, orders.length ? 'Nothing here' : 'No orders yet'),
         h('p', {}, orders.length ? 'No orders match this filter.' : 'Your data purchases will show up here.'),
-        orders.length ? null : h('button', { class: 'btn primary', onclick: () => switchTab('buy') }, 'Buy data')));
+        orders.length ? null : h('button', { class: 'btn primary', onclick: () => switchTab('home') }, 'Buy data')));
       return;
     }
     shown.forEach((order, i) => { const card = orderCard(order, (o) => openDetail(o, () => load(true))); card.style.setProperty('--i', String(Math.min(i, 8))); list.append(card); });

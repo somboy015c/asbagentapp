@@ -10,7 +10,6 @@ import { exitApp, hideNativeSplash, onBackButton, styleStatusBar } from './nativ
 import { publicSettings } from './api.js';
 import { showOnboarding } from './onboarding.js';
 import { homeScreen } from './home.js';
-import { buyScreen } from './buy.js';
 import { ordersScreen } from './orders.js';
 import { accountScreen } from './account.js';
 import { loginScreen, registerScreen, forgotScreen } from './auth.js';
@@ -55,7 +54,7 @@ async function hideSplash() {
 
 // ---------------------------------------------------------------- navigation bar
 function buildNav() {
-  const items = [['home', 'Home', 'home'], ['buy', 'Buy', 'bolt'], ['orders', 'Orders', 'orders'], ['account', 'Account', 'user']];
+  const items = [['home', 'Home', 'home'], ['orders', 'Orders', 'orders'], ['account', 'Account', 'user']];
   $('#nav').replaceChildren(...items.map(([tab, label, ico]) => h('button', {
     dataset: { tab },
     onclick: () => { if (currentScreen()?.name === tab) $('#view').scrollTo({ top: 0, behavior: 'smooth' }); else switchTab(tab); },
@@ -111,7 +110,7 @@ async function boot() {
   renderSplash();
   hideNativeSplash();
 
-  registerScreens({ home: homeScreen, buy: buyScreen, orders: ordersScreen, account: accountScreen, login: loginScreen, register: registerScreen, forgot: forgotScreen });
+  registerScreens({ home: homeScreen, orders: ordersScreen, account: accountScreen, login: loginScreen, register: registerScreen, forgot: forgotScreen });
   buildNav();
   onBackButton(handleBack);
   on('session', () => { if (TABS.includes(currentScreen()?.name) && !hasSheet()) refresh(); });

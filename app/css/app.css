@@ -308,3 +308,36 @@ svg { flex: none; }
 .payhint { margin: 0; padding: 8px 16px; font-size: 13px; background: #fff7e6; color: #8a5a00; text-align: center; }
 .paybar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px 2px; border-top: 1px solid var(--line); }
 .paylink { align-self: center; margin-bottom: calc(6px + var(--sab)); color: var(--muted); }
+
+/* ---------- VTU-style home ---------- */
+.vtu-head { padding: calc(14px + var(--sat)) 18px 56px; color: var(--on-primary); background: linear-gradient(150deg, var(--primary), var(--primary-deep)); border-radius: 0 0 30px 30px; }
+.vtu-top { display: flex; align-items: center; gap: 12px; }
+.vtu-top strong { display: block; font-size: 17px; line-height: 1.15; }
+.vtu-top span { font-size: 12px; opacity: .8; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.greet { margin-top: 18px; font-size: 22px; font-weight: 800; letter-spacing: -.2px; }
+.greet-sub { margin-top: 4px; opacity: .85; font-size: 14px; }
+.balcard { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 18px; background: rgba(255, 255, 255, .16); }
+.balcard small { opacity: .85; }
+.balcard .bal { font-size: 26px; font-weight: 800; letter-spacing: -.4px; }
+.balico { width: 46px; height: 46px; border-radius: 15px; background: rgba(255, 255, 255, .18); display: grid; place-items: center; }
+.quickcard { position: relative; margin: -34px 16px 0; padding: 14px 8px; border-radius: 22px; background: var(--surface); box-shadow: var(--shadow2); display: grid; grid-template-columns: repeat(4, 1fr); }
+.quickcard .q { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 6px 0; border-radius: 16px; }
+.quickcard .qi { width: 50px; height: 50px; border-radius: 17px; background: var(--tint); color: var(--primary); display: grid; place-items: center; transition: transform .2s var(--ease); }
+.quickcard .q:active .qi { transform: scale(.9); }
+.quickcard small { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.plans-wrap { padding: 24px 16px 8px; }
+.plans-title h3 { font-size: 18px; font-weight: 800; }
+.nettabs { display: flex; gap: 10px; overflow-x: auto; padding: 14px 2px 6px; margin: 0 -2px; scrollbar-width: none; }
+.nettabs::-webkit-scrollbar { display: none; }
+.nettab { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px 0 14px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow1); font-weight: 700; font-size: 14.5px; color: var(--text); transition: background .25s, color .25s, transform .2s var(--ease), box-shadow .25s; }
+.nettab .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--nc); box-shadow: 0 0 0 2px rgba(255, 255, 255, .7); }
+.nettab.on { background: var(--nc); color: var(--nf); box-shadow: 0 6px 16px rgba(20, 22, 58, .18); transform: translateY(-1px); }
+.nettab.on .dot { background: var(--nf); box-shadow: none; }
+.plangrid { --nc: var(--primary); display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
+.plan-card { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 16px 16px 14px; min-height: 84px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow1); transition: transform .15s var(--ease), box-shadow .2s; }
+.plan-card:active { transform: scale(.97); }
+.plan-card b { font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
+.plan-card span { color: var(--primary); font-weight: 700; font-size: 15px; }
+.plan-card .go { position: absolute; right: 12px; bottom: 12px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; }
+.buyhead { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px; background: var(--tint); }
+.netdot { width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; font-weight: 800; }
