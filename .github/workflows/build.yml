@@ -65,6 +65,9 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      # GitHub's Ubuntu runners already have the Android SDK ($ANDROID_HOME). All that is needed is to accept
+      # its licenses so Gradle may download any missing piece. (The old android-actions/setup-android action
+      # failed because it asks for an SDK package called "tools" that Google no longer publishes.)
       - name: Accept Android SDK licenses
         run: |
           echo "Android SDK at: $ANDROID_HOME"
