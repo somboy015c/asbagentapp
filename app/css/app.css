@@ -83,7 +83,7 @@ svg { flex: none; }
 .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; }
 .h2 { font-size: 22px; font-weight: 800; line-height: 1.2; letter-spacing: -.2px; }
 .lead { color: var(--muted); margin-top: 8px; }
-.card { background: var(--surface); border-radius: 22px; padding: 18px; box-shadow: var(--shadow1); }
+.card { background: var(--surface); border-radius: 12px; padding: 18px; box-shadow: var(--shadow1); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .row { display: flex; align-items: center; gap: 12px; }
 .spread { justify-content: space-between; }
@@ -190,7 +190,7 @@ svg { flex: none; }
 .note svg { margin-top: 1px; }
 
 /* ---------- Orders / pills ---------- */
-.order { display: flex; gap: 14px; align-items: center; padding: 14px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow1); width: 100%; text-align: left; }
+.order { display: flex; gap: 14px; align-items: center; padding: 14px; border-radius: 12px; background: var(--surface); box-shadow: var(--shadow1); width: 100%; text-align: left; }
 .order .dot { width: 46px; height: 46px; border-radius: 14px; background: var(--tint); color: var(--primary-deep); display: grid; place-items: center; font-weight: 800; }
 .order .meta { flex: 1; min-width: 0; }
 .order .meta b { display: block; }
@@ -310,19 +310,19 @@ svg { flex: none; }
 .paylink { align-self: center; margin-bottom: calc(6px + var(--sab)); color: var(--muted); }
 
 /* ---------- VTU-style home ---------- */
-.vtu-head { padding: calc(14px + var(--sat)) 18px 56px; color: var(--on-primary); background: linear-gradient(150deg, var(--primary), var(--primary-deep)); border-radius: 0 0 30px 30px; }
+.vtu-head { padding: calc(14px + var(--sat)) 18px 56px; color: var(--on-primary); background: linear-gradient(150deg, var(--primary), var(--primary-deep)); border-radius: 0 0 18px 18px; }
 .vtu-top { display: flex; align-items: center; gap: 12px; }
 .vtu-top strong { display: block; font-size: 17px; line-height: 1.15; }
 .vtu-top span { font-size: 12px; opacity: .8; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .greet { margin-top: 18px; font-size: 22px; font-weight: 800; letter-spacing: -.2px; }
 .greet-sub { margin-top: 4px; opacity: .85; font-size: 14px; }
-.balcard { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 18px; background: rgba(255, 255, 255, .16); }
+.balcard { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 12px; background: rgba(255, 255, 255, .16); }
 .balcard small { opacity: .85; }
 .balcard .bal { font-size: 26px; font-weight: 800; letter-spacing: -.4px; }
-.balico { width: 46px; height: 46px; border-radius: 15px; background: rgba(255, 255, 255, .18); display: grid; place-items: center; }
-.quickcard { position: relative; margin: -34px 16px 0; padding: 14px 8px; border-radius: 22px; background: var(--surface); box-shadow: var(--shadow2); display: grid; grid-template-columns: repeat(4, 1fr); }
+.balico { width: 44px; height: 44px; border-radius: 10px; background: rgba(255, 255, 255, .18); display: grid; place-items: center; }
+.quickcard { position: relative; margin: -34px 16px 0; padding: 14px 8px; border-radius: 14px; background: var(--surface); box-shadow: var(--shadow2); display: grid; grid-template-columns: repeat(4, 1fr); }
 .quickcard .q { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 6px 0; border-radius: 16px; }
-.quickcard .qi { width: 50px; height: 50px; border-radius: 17px; background: var(--tint); color: var(--primary); display: grid; place-items: center; transition: transform .2s var(--ease); }
+.quickcard .qi { width: 48px; height: 48px; border-radius: 12px; background: var(--tint); color: var(--primary); display: grid; place-items: center; transition: transform .2s var(--ease); }
 .quickcard .q:active .qi { transform: scale(.9); }
 .quickcard small { font-size: 12.5px; font-weight: 600; color: var(--text); }
 .plans-wrap { padding: 24px 16px 8px; }
@@ -331,28 +331,29 @@ svg { flex: none; }
 .plans-title small { color: var(--muted); font-size: 12.5px; }
 .nettabs { display: flex; gap: 10px; overflow-x: auto; padding: 14px 2px 6px; margin: 0 -2px; scrollbar-width: none; }
 .nettabs::-webkit-scrollbar { display: none; }
-.nettab { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px 0 14px; border-radius: 20px; background: var(--surface); box-shadow: var(--shadow1); font-weight: 700; font-size: 14.5px; color: var(--text); transition: background .25s, color .25s, transform .2s var(--ease), box-shadow .25s; }
+.nettab { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px 0 12px; border-radius: 10px; background: var(--surface); box-shadow: var(--shadow1); font-weight: 700; font-size: 14.5px; color: var(--text); transition: background .25s, color .25s, transform .2s var(--ease), box-shadow .25s; }
 .nettab .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--nc); box-shadow: 0 0 0 2px rgba(255, 255, 255, .7); }
 .nettab.on { background: linear-gradient(135deg, #2F6BFF, #1747D6); color: #fff; box-shadow: 0 8px 20px rgba(31, 91, 255, .38); transform: translateY(-1px); }
 .nettab.on .dot { box-shadow: 0 0 0 2px rgba(255, 255, 255, .9); }
 .plangrid { --nc: var(--primary); display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
 
-/* ---------- Brand-styled plan cards (MTN yellow, Telecel red, AirtelTigo blue) ---------- */
-.plangrid { --c1: var(--primary); --c2: var(--primary-deep); --ink: var(--on-primary); --pill-bg: #fff; --pill-fg: var(--primary-deep); --deco: rgba(255, 255, 255, .14); --chip: rgba(255, 255, 255, .18); gap: 14px; }
-.plan-card { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; text-align: left; min-height: 142px; padding: 14px 14px 12px; border-radius: 24px; color: var(--ink); background: linear-gradient(145deg, var(--c1), var(--c2)); box-shadow: 0 12px 24px rgba(0, 0, 0, .18); box-shadow: 0 12px 24px color-mix(in srgb, var(--c2) 38%, transparent); transition: transform .18s var(--ease), box-shadow .2s; }
+/* ---------- Brand-styled plan cards (MTN yellow, Telecel red, AirtelTigo blue): compact, slightly rounded ---------- */
+.plangrid { --c1: var(--primary); --c2: var(--primary-deep); --ink: var(--on-primary); --pill-bg: #fff; --pill-fg: var(--primary-deep); --deco: rgba(255, 255, 255, .14); --chip: rgba(255, 255, 255, .18); grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 339px) { .plangrid { grid-template-columns: repeat(2, 1fr); } }
+.plan-card { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: flex-start; text-align: left; min-height: 100px; padding: 10px; border-radius: 10px; color: var(--ink); background: linear-gradient(145deg, var(--c1), var(--c2)); box-shadow: 0 4px 10px rgba(0, 0, 0, .14); transition: transform .18s var(--ease), box-shadow .2s; }
 .plan-card.pop { animation-fill-mode: backwards; }
-.plan-card::before { content: ""; position: absolute; width: 130px; height: 130px; right: -38px; top: -42px; border-radius: 50%; background: var(--deco); }
-.plan-card::after { content: ""; position: absolute; width: 150px; height: 150px; left: -60px; bottom: -78px; border-radius: 50%; border: 22px solid var(--deco); }
+.plan-card::before { content: ""; position: absolute; width: 70px; height: 70px; right: -24px; top: -26px; border-radius: 50%; background: var(--deco); }
+.plan-card::after { content: ""; position: absolute; width: 80px; height: 80px; left: -36px; bottom: -44px; border-radius: 50%; border: 12px solid var(--deco); }
 .plan-card > * { position: relative; z-index: 1; }
-.plan-card:active { transform: scale(.96); box-shadow: 0 6px 14px color-mix(in srgb, var(--c2) 30%, transparent); }
-.pc-net { display: inline-block; padding: 3px 10px; border-radius: 10px; background: var(--chip); font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
-.pc-size { display: block; margin-top: 12px; font-size: 30px; font-weight: 900; letter-spacing: -.8px; line-height: 1; }
+.plan-card:active { transform: scale(.96); box-shadow: 0 2px 6px rgba(0, 0, 0, .14); }
+.pc-net { display: inline-block; padding: 2px 7px; border-radius: 5px; background: var(--chip); font-size: 9.5px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; }
+.pc-size { display: block; margin-top: 8px; font-size: 21px; font-weight: 900; letter-spacing: -.5px; line-height: 1; }
 .pc-sub { display: block; margin-top: 4px; font-size: 12px; opacity: .8; }
-.pc-foot { width: 100%; margin-top: auto; padding-top: 12px; display: flex; align-items: center; justify-content: space-between; }
-.pc-price { padding: 6px 12px; border-radius: 14px; background: var(--pill-bg); color: var(--pill-fg); font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(0, 0, 0, .14); }
-.pc-go { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--chip); }
-.buyhead { --c1: var(--primary); --c2: var(--primary-deep); --ink: var(--on-primary); --pill-bg: #fff; --pill-fg: var(--primary-deep); --deco: rgba(255, 255, 255, .14); --chip: rgba(255, 255, 255, .18); position: relative; overflow: hidden; display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 22px; color: var(--ink); background: linear-gradient(145deg, var(--c1), var(--c2)); }
+.plan-card .pc-sub, .plan-card .pc-go { display: none; }
+.pc-foot { width: 100%; margin-top: auto; padding-top: 8px; display: flex; }
+.pc-price { padding: 4px 8px; border-radius: 6px; background: var(--pill-bg); color: var(--pill-fg); font-weight: 800; font-size: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, .12); }
+.buyhead { --c1: var(--primary); --c2: var(--primary-deep); --ink: var(--on-primary); --pill-bg: #fff; --pill-fg: var(--primary-deep); --deco: rgba(255, 255, 255, .14); --chip: rgba(255, 255, 255, .18); position: relative; overflow: hidden; display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; color: var(--ink); background: linear-gradient(145deg, var(--c1), var(--c2)); }
 .buyhead::before { content: ""; position: absolute; width: 120px; height: 120px; right: -30px; top: -50px; border-radius: 50%; background: var(--deco); }
 .buyhead > * { position: relative; }
 .bh-size { display: block; margin-top: 8px; font-size: 28px; font-weight: 900; letter-spacing: -.6px; line-height: 1; }
-.bh-price { padding: 8px 14px; border-radius: 15px; background: var(--pill-bg); color: var(--pill-fg); font-weight: 800; font-size: 16px; }
+.bh-price { padding: 7px 12px; border-radius: 8px; background: var(--pill-bg); color: var(--pill-fg); font-weight: 800; font-size: 16px; }
