@@ -138,6 +138,8 @@ async function main() {
   // The same shape the API returns, plus local copies of the images (used until the live refresh answers).
   const baked = {
     apiBase: API_BASE,
+    // true = the payment page is shown inline on the app's own payment screen; false = always in the in-app browser window.
+    paymentInline: String(process.env.PAYMENT_INLINE || 'true').toLowerCase() !== 'false',
     subdomain: SUB,
     builtAt: new Date().toISOString(),
     store: {

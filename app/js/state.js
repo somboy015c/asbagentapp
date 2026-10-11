@@ -59,6 +59,12 @@ export const getSession = (kind = 'store') => ls.get(`session_${kind}`);
 export function setSession(kind, token, user) { ls.set(`session_${kind}`, { token, user }); emit('session', { kind }); }
 export function clearSession(kind = 'store') { ls.del(`session_${kind}`); emit('session', { kind }); }
 
+/** Refreshes the saved profile of the signed-in person WITHOUT announcing a sign-in (that would redraw the screen again). */
+export function updateSessionUser(kind, user) {
+  const session = ls.get(`session_${kind}`);
+  if (session) ls.set(`session_${kind}`, { ...session, user });
+}
+
 // ---- Orders placed on this phone (guests have no account to list them from) ----
 export const localOrders = () => ls.get('orders_local', []);
 export function rememberOrder(entry) {

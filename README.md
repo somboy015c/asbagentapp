@@ -64,6 +64,7 @@ never be updated; users would have to uninstall and reinstall.
 | `API_BASE` | `https://api.asbdataghana.com/api/v1` |
 | `STORE_BASE_DOMAIN` | `asbdataghana.com` (the part after the store name, e.g. smekart.**asbdataghana.com**) |
 | `RELEASE_TAG` | `agent-apps` |
+| `PAYMENT_INLINE` | `true` (payment page inline in the app; `false` = always the secure window) |
 
 ### 4. Let the website start builds
 Create a GitHub **fine-grained personal access token**: Settings > Developer settings > Personal access tokens >
@@ -102,7 +103,7 @@ Install it on an Android phone (allow "install unknown apps" for the browser) an
 | Onboarding | 3 swipeable slides; words from the store's hero / services / call-to-action text; shown once |
 | Home | Hero, networks, about + features, how it works, services, FAQ, call-to-action, contact + socials, all from store settings |
 | Buy | Network tabs, bundle grid, recipient number, checkout sheet (guest or signed in), Payaza / Korapay choice |
-| Payment | Opens the gateway's secure page **inside the app**, confirms on return, success animation; cancelled payments get a "Complete payment" button and the website emails the same link |
+| Payment | A payment screen built for it: our header and footer around the gateway's page shown **inline** (no browser), confirms by itself, success animation; cancelled payments get a "Complete payment" button and the website emails the same link |
 | Orders | Account orders, or the orders placed on this phone for guests; tap for details; unpaid orders can be paid |
 | Sign in / Register / Forgot password | Customer accounts of this store only (the API scopes accounts by store), with the store's own sign-in picture and quote |
 | Account (signed in) | Profile, wallet balance, refund history, change password, sign out; the same things the store website's customer dashboard offers |
@@ -112,9 +113,10 @@ API every time the app opens**, so a change appears immediately; the rebuild (st
 is what updates the app name, icon, splash and colours.
 
 ## What still leaves the app (honest list)
-- **Payment pages** (Payaza / Korapay) open in the in-app browser (Chrome Custom Tab). It is shown on top of the
-  app and the app confirms the payment when you come back, but it is Chrome's secure window, not our own screen;
-  gateways do not allow their pages inside another page.
+- **Payment pages** (Payaza / Korapay) are shown inline on the app's own payment screen. Korapay documents that its
+  checkout can be shown in an iframe; Payaza does not say, so **test each gateway once**. If a gateway refuses to
+  load inline, the screen has a "Page not loading? Open in a secure window" link (in-app Chrome window), and
+  setting the repository variable `PAYMENT_INLINE=false` makes every payment use that window.
 - **Email links** (verify email, reset password) open in the phone's browser, because they are links inside emails.
 - Call, WhatsApp and email buttons hand over to the phone's own apps.
 

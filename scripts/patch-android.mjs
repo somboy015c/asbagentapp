@@ -5,7 +5,8 @@
 // Every edit is checked: if Capacitor ever changes the generated files, the build FAILS here
 // instead of quietly producing an unsigned or mis-versioned APK.
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
+import path from 'node:path';
 
 const info = JSON.parse(readFileSync('build-info.json', 'utf8'));
 const keystoreB64 = process.env.ANDROID_KEYSTORE_BASE64;
@@ -47,6 +48,42 @@ if (!manifest.includes('windowSoftInputMode')) {
   if (!manifest.includes('<activity')) throw new Error('No <activity> in AndroidManifest.xml.');
   manifest = manifest.replace('<activity', '<activity\n            android:windowSoftInputMode="adjustResize"');
   writeFileSync(manifestFile, manifest);
+}
+
+// 4. Gateway checkout pages shown inside the payment screen (an iframe) may rely on third-party cookies,
+//    which Android's WebView blocks by default. Switch them on for the app's own WebView.
+function findFile(dir, name) {
+  for (const entry of readdirSync(dir)) {
+    const full = path.join(dir, entry);
+    if (statSync(full).isDirectory()) { const hit = findFile(full, name); if (hit) return hit; } else if (entry === name) return full;
+  }
+  return null;
+}
+const mainActivity = findFile('android/app/src/main/java', 'MainActivity.java');
+if (mainActivity) {
+  const source = readFileSync(mainActivity, 'utf8');
+  const pkg = source.match(/^package\s+([\w.]+);/m)?.[1];
+  if (pkg) {
+    writeFileSync(mainActivity, `package ${pkg};
+
+import android.webkit.CookieManager;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+    @Override
+    public void onStart() {
+        super.onStart();
+        try {
+            CookieManager.getInstance().setAcceptThirdPartyCookies(this.bridge.getWebView(), true);
+        } catch (Exception ignored) {
+            // Not critical: the payment screen also offers the in-app browser window.
+        }
+    }
+}
+`);
+  }
+} else {
+  console.warn('MainActivity.java not found; third-party cookies were not enabled (payment screen still works with the secure-window fallback).');
 }
 
 console.log(`Android build ready: ${info.appName} ${info.versionName} (versionCode ${versionCode}).`);

@@ -2,7 +2,7 @@
 
 import { api } from './api.js';
 import { h, icon, money, initials, fmtDate } from './util.js';
-import { clearSession, getSession, setSession, state, store } from './state.js';
+import { clearSession, getSession, state, store, updateSessionUser } from './state.js';
 import { confirmSheet, field, openSheet, setLoading, toast } from './ui.js';
 import { go, refresh, switchTab } from './nav.js';
 
@@ -49,7 +49,7 @@ export function accountScreen() {
       } }, icon('logout', 20), 'Sign out'));
 
     api('/wallet').then((res) => { if (res.ok) balance.textContent = money(res.data.balance); });
-    api('/me').then((res) => { if (res.ok) { const u = res.data.data || res.data; setSession('store', session.token, u); verify.hidden = u.email_verified !== false; } });
+    api('/me').then((res) => { if (res.ok) { const u = res.data.data || res.data; updateSessionUser('store', u); verify.hidden = u.email_verified !== false; } });
   }
 
   body.append(

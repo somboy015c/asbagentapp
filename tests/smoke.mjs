@@ -98,8 +98,11 @@ document.hidden = false;
 document.addEventListener = () => {};
 
 const store$ = {};
+const winListeners = {};
 Object.assign(globalThis, {
   Node: Node_, document, window: globalThis,
+  addEventListener: (type, fn) => { (winListeners[type] ||= []).push(fn); },
+  removeEventListener: (type, fn) => { winListeners[type] = (winListeners[type] || []).filter((f) => f !== fn); },
   localStorage: { getItem: (k) => (k in store$ ? store$[k] : null), setItem: (k, v) => { store$[k] = String(v); }, removeItem: (k) => { delete store$[k]; } },
   requestAnimationFrame: (fn) => setTimeout(fn, 0), MutationObserver: class { observe() {} disconnect() {} },
   getComputedStyle: () => ({ position: 'relative' }), location: { reload() {} },
@@ -197,10 +200,12 @@ setVal(0, 'Ama'); setVal(1, 'Mensah'); setVal(2, 'ama@example.com'); setVal(3, '
 await byText(sheet, 'Pay GH₵22.50').click();
 await wait(400);
 ok('order created through the guest endpoint', calls.includes('POST /orders/guest'));
-ok('payment screen shown', textOf(document.body.querySelector('#sheet-root')).includes('Complete your payment'));
+ok('inline payment screen shows the gateway page in an iframe', textOf(document.body.querySelector('#sheet-root')).includes('Secure payment') && document.body.querySelector('#sheet-root').querySelectorAll('iframe')[0]?.attrs.src === 'https://pay.example/x');
 await byText(document.body.querySelector('#sheet-root'), "I've paid").click();
 await wait(500);
 ok('payment confirmed -> success screen', textOf(document.body.querySelector('#sheet-root')).includes('Payment received'));
+await byText(document.body.querySelector('#sheet-root'), 'Done').click(); // close it, like a customer would
+await wait(500);
 
 // Other screens render without throwing
 const { switchTab, go } = await import(pathToFileURL(path.join(ROOT, 'app/js/nav.js')));
@@ -226,11 +231,26 @@ ok('cancelled payment shows "Payment not completed"', textOf(sheets()).includes(
 ok('cancelled payment shows the emailed-link note', textOf(sheets()).includes('a***@mail.com'));
 await byText(sheets(), 'Complete payment').click();
 await wait(200);
-ok('"Complete payment" goes back to the payment screen', textOf(sheets()).includes('Complete your payment'));
+ok('"Complete payment" goes back to the inline payment screen', textOf(sheets()).includes('Secure payment') && sheets().querySelectorAll('iframe')[0]?.attrs.src === 'https://pay.example/again');
+// fallback: open in the in-app browser window
+await byText(sheets(), 'Open in a secure window').click(); await wait(150);
+ok('"Open in a secure window" switches to the window flow', textOf(sheets()).includes('Complete your payment') && sheets().querySelectorAll('iframe').length === 0);
 await byText(sheets(), 'Cancel payment').click();
 await wait(100);
 await byText(sheets(), 'Not now').click();
 ok('"Not now" ends the payment as cancelled', (await payment).status === 'cancelled');
+
+// ---- the store's checkout page, shown inside the iframe, tells the app it is back -> the app confirms by itself
+{
+  let verified = 0;
+  const paymentViaMessage = runPayment({ url: 'https://pay.example/m', verify: async () => { verified++; return { status: 'success' }; }, summary: [] });
+  await wait(100);
+  (winListeners.message || []).forEach((fn) => fn({ data: { type: 'asb-payment-return', reference: 'x' } }));
+  await wait(300);
+  ok('a "payment finished" message from the iframe triggers confirmation', verified >= 1 && textOf(sheets()).includes('Payment received'));
+  await byText(sheets(), 'Done').click();
+  ok('payment resolves as success', (await paymentViaMessage).status === 'success');
+}
 
 const { setSession } = await import(pathToFileURL(path.join(ROOT, 'app/js/state.js')));
 // ---- customer account: wallet, refund history, change password (what the store's own dashboard offers)
@@ -242,6 +262,8 @@ setSession('store', 'tok', { name: 'Ama Mensah', email: 'ama@example.com', phone
 switchTab('account'); await wait(300);
 ok('signed-in account shows refund history and change password', textOf(view).includes('Refund history') && textOf(view).includes('Change password'));
 ok('wallet balance is shown', textOf(view).includes('GH₵12.50'));
+await wait(600);
+ok('account screen does not refresh itself in a loop', calls.filter((c) => c === 'GET /me').length <= 2);
 await byText(view, 'Refund history').click(); await wait(300);
 ok('refund history lists the refund', textOf(sheets()).includes('Refund for failed order'));
 document.body.querySelector('#sheet-root').querySelectorAll('.icon-btn').forEach((b) => b.click());

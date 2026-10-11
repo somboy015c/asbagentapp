@@ -1,7 +1,10 @@
 // The whole "pay inside the app" journey, used for every data purchase.
 //
-//   1. The gateway's secure page (Payaza / Korapay) opens in the in-app browser: the person never
-//      leaves the app, and card / MoMo details never touch the app itself.
+//   1. The gateway's secure page (Payaza / Korapay) is shown INLINE on a payment screen built for it
+//      (our own header + footer around the gateway's page): the person never leaves the app, and
+//      card / MoMo details never touch the app's own code (they are typed into the gateway's page).
+//      If a gateway refuses to be shown inline, "Open in a secure window" falls back to the in-app
+//      browser. Set the build variable PAYMENT_INLINE=false to always use that window instead.
 //   2. While it is open - and again the moment it is closed or the app comes back to the foreground -
 //      we ask the server whether the payment went through (verify()).
 //   3. Paid  -> animated success screen.
@@ -9,7 +12,7 @@
 //      same order) and, for orders, an email with the same link (the server sends it).
 
 import { h, icon, sleep, confetti } from './util.js';
-import { store } from './state.js';
+import { state, store } from './state.js';
 import { openSheet, setLoading, toast } from './ui.js';
 import { closeInApp, onBrowserClosed, onResume, openInApp } from './native.js';
 
@@ -34,14 +37,23 @@ export function runPayment(opts) {
     let url = opts.url;
     let finished = false;
     let busy = false;
+    let forceWindow = state.cfg?.paymentInline === false; // true = use the in-app browser window instead of the inline screen
+    let slowTimer = null;
     let pollTimer = null;
     let stopClosed = () => {};
     let stopResume = () => {};
+
+    // The store's checkout page, when it ends up inside our payment screen after paying, tells us so we can
+    // confirm immediately (we still verify with the server: the message is only a nudge).
+    const onMessage = (event) => { if (event?.data?.type === 'asb-payment-return') settle(); };
+    window.addEventListener?.('message', onMessage);
 
     const finish = (status) => {
       if (finished) return;
       finished = true;
       clearInterval(pollTimer);
+      clearTimeout(slowTimer);
+      window.removeEventListener?.('message', onMessage);
       stopClosed();
       stopResume();
       sheet.close();
@@ -51,6 +63,27 @@ export function runPayment(opts) {
     const show = (...nodes) => sheet.setContent(h('div', { class: 'payfull' }, ...nodes));
 
     // ---- views ----
+    /** The payment screen: the gateway's page inline, inside the app's own frame. */
+    function viewInline() {
+      clearTimeout(slowTimer);
+      const hint = h('p', { class: 'payhint', hidden: true }, 'Taking a while? You can open the payment page in a secure window instead.');
+      const loader = h('div', { class: 'payload' },
+        h('div', { class: 'orb' }, h('i', {}, h('span', { class: 'spin', style: { width: '30px', height: '30px', border: '3px solid #fff', borderRightColor: 'transparent', borderRadius: '50%' } }))),
+        h('b', {}, 'Loading secure payment...'));
+      const frame = h('iframe', { class: 'payiframe', src: url, title: 'Secure payment', allow: 'payment *; clipboard-write', referrerpolicy: 'origin' });
+      frame.addEventListener('load', () => { clearTimeout(slowTimer); loader.remove(); hint.hidden = true; });
+      slowTimer = setTimeout(() => { hint.hidden = false; }, 15000);
+
+      sheet.setContent(h('div', { class: 'payframe' },
+        h('div', { class: 'payhead' }, h('span', { class: 'lockbadge' }, icon('lock', 18)), h('div', {}, h('b', {}, 'Secure payment'), h('small', {}, 'Card or Mobile Money'))),
+        h('div', { class: 'payview' }, frame, loader),
+        hint,
+        h('div', { class: 'paybar' },
+          h('button', { class: 'btn primary', onclick: () => settle() }, "I've paid, check now"),
+          h('button', { class: 'btn text sm', onclick: () => viewCancelled() }, 'Cancel payment')),
+        h('button', { class: 'btn text sm paylink', onclick: () => { forceWindow = true; viewWaiting(); openPage(); } }, 'Page not loading? Open in a secure window')));
+    }
+
     function viewWaiting() {
       show(
         h('div', { class: 'orb' }, h('i', {}, icon('lock', 32))),
@@ -60,6 +93,11 @@ export function runPayment(opts) {
         h('button', { class: 'btn outline block', onclick: () => openPage() }, 'Reopen the payment page'),
         h('button', { class: 'btn text', onclick: () => viewCancelled() }, 'Cancel payment'),
       );
+    }
+
+    /** Shows the payment page the way this build is set up to: inline screen, or the in-app browser window. */
+    function showPayment() {
+      if (forceWindow) { viewWaiting(); openPage(); } else { viewInline(); }
     }
 
     function viewChecking(text = 'Confirming your payment...') {
@@ -85,6 +123,7 @@ export function runPayment(opts) {
 
     async function viewCancelled() {
       clearInterval(pollTimer);
+      clearTimeout(slowTimer);
       closeInApp();
       const note = h('p', { class: 'muted', style: { fontSize: '13.5px' } });
       const again = h('button', { class: 'btn primary lg block', onclick: async () => {
@@ -95,9 +134,8 @@ export function runPayment(opts) {
           if (!next) { setLoading(again, false); settle(); return; } // already paid after all
           url = next;
           setLoading(again, false);
-          viewWaiting();
           startPolling();
-          await openPage();
+          showPayment();
         } catch (err) {
           setLoading(again, false);
           toast(err?.message || 'Could not restart the payment.', 'bad');
@@ -160,8 +198,7 @@ export function runPayment(opts) {
     stopClosed = onBrowserClosed(() => settle());
     stopResume = onResume(() => { if (!busy && !finished) checkOnce(); });
 
-    viewWaiting();
     startPolling();
-    openPage();
+    showPayment();
   });
 }
