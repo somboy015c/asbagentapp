@@ -1,11 +1,12 @@
 // The three welcome slides shown the first time the app opens. The words come from the agent's
 // Store Settings (hero / services / call-to-action text); the pictures are placeholders you replace
-// by dropping slide-1.png, slide-2.png and slide-3.png into app/assets/onboarding/.
+// by replacing slide-1.jpg, slide-2.jpg and slide-3.jpg in app/assets/onboarding/ (landscape pictures are
+// shown in full, never cropped, so any lettering inside them stays readable).
 
 import { h, icon } from './util.js';
 import { ls, store } from './state.js';
 
-const EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'svg']; // tried in this order; .svg is the built-in placeholder
+const EXTENSIONS = ['jpg', 'png', 'jpeg', 'webp', 'svg']; // tried in this order; .svg is only a fallback
 
 function slideImage(n) {
   let attempt = 0;

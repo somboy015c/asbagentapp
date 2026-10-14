@@ -64,8 +64,14 @@ export async function publicSettings(force = false) {
   return state.settings;
 }
 
-/** Payment gateways the admin has switched on that accept an order of this size (e.g. Korapay is hidden under GH₵10). */
+/**
+ * Payment gateways the admin has switched on that accept an order of this size (e.g. Korapay is hidden under GH₵10).
+ * Korapay is listed first, so it is the one shown and selected by default; Payaza follows.
+ */
 export async function gatewaysFor(amount) {
   const settings = await publicSettings();
-  return (settings.payment_gateways || []).filter((g) => !(g.min_amount > 0) || Number(amount) + 0.001 >= g.min_amount);
+  const preferred = ['korapay', 'payaza'];
+  return (settings.payment_gateways || [])
+    .filter((g) => !(g.min_amount > 0) || Number(amount) + 0.001 >= g.min_amount)
+    .sort((a, b) => (preferred.indexOf(a.key) + 1 || 99) - (preferred.indexOf(b.key) + 1 || 99));
 }

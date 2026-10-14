@@ -242,11 +242,11 @@ svg { flex: none; }
 .onb { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
 .onb .skip { position: absolute; top: calc(10px + var(--sat)); right: 14px; z-index: 3; }
 .onb .track { flex: 1; display: flex; transition: transform .5s var(--ease); touch-action: pan-y; }
-.onb .slide { flex: none; width: 100%; display: flex; flex-direction: column; align-items: center; padding: calc(56px + var(--sat)) 28px 0; text-align: center; }
-.onb .pic { width: min(78vw, 340px); height: min(78vw, 340px); border-radius: 36px; overflow: hidden; background: var(--tint); box-shadow: var(--shadow2); transform: scale(.9); opacity: .6; transition: transform .6s var(--ease), opacity .6s; }
+.onb .slide { flex: none; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: calc(44px + var(--sat)) 22px 0; text-align: center; }
+.onb .pic { width: min(92vw, 460px); aspect-ratio: 1100 / 600; border-radius: 20px; overflow: hidden; background: var(--tint); box-shadow: var(--shadow2); transform: scale(.92); opacity: .6; transition: transform .6s var(--ease), opacity .6s; }
 .onb .slide.on .pic { transform: none; opacity: 1; }
 .onb .pic img { width: 100%; height: 100%; object-fit: cover; }
-.onb h2 { margin-top: 30px; font-size: 26px; font-weight: 800; letter-spacing: -.4px; line-height: 1.15; transition: transform .6s .1s var(--ease), opacity .6s .1s; }
+.onb h2 { margin-top: 26px; font-size: 24px; font-weight: 800; letter-spacing: -.4px; line-height: 1.15; transition: transform .6s .1s var(--ease), opacity .6s .1s; }
 .onb p { margin-top: 12px; color: var(--muted); font-size: 15.5px; max-width: 340px; transition: transform .6s .18s var(--ease), opacity .6s .18s; }
 .onb .slide:not(.on) h2, .onb .slide:not(.on) p { opacity: 0; transform: translateY(16px); }
 .onb .bottom { padding: 14px 24px calc(22px + var(--sab)); display: flex; align-items: center; justify-content: space-between; }

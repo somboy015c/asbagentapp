@@ -178,6 +178,7 @@ await wait(2800); // splash (2.1s) + hand-over
 ok('onboarding opened on first launch', document.body.querySelectorAll('.onb').length === 1);
 const onboarding = document.body.querySelector('.onb');
 ok('onboarding has 3 slides from store text', onboarding.querySelectorAll('.slide').length === 3 && textOf(onboarding).includes('Cheap data, delivered fast'));
+ok('onboarding uses the three supplied pictures', [1, 2, 3].every((n) => onboarding.querySelectorAll('img').some((img) => img.attrs.src === `assets/onboarding/slide-${n}.jpg`)));
 await byText(onboarding, 'Next').click();
 await byText(onboarding, 'Next').click();
 await byText(onboarding, 'Get started').click();
@@ -198,7 +199,7 @@ async function purchase(gatewayLabel) {
   await byText(view, '5GB').click();
   await wait(250);
   const sheet = document.body.querySelector('#sheet-root');
-  if (gatewayLabel === 'Korapay') await byText(sheet, 'Korapay').click();
+  if (gatewayLabel === 'Payaza') await byText(sheet, 'Payaza').click(); // Korapay is already selected by default
   const inputs = sheet.querySelectorAll('input');
   inputs[0].value = '0241234567'; inputs[1].value = 'Ama'; inputs[2].value = 'Mensah'; inputs[3].value = 'ama@example.com';
   await byText(sheet, 'Pay GH₵22.50').click();
@@ -209,6 +210,8 @@ await wait(250);
 const sheet = document.body.querySelector('#sheet-root');
 ok('purchase sheet opens with the number warning', textOf(sheet).includes('cannot be undone'));
 ok('both gateways offered above GH₵10', textOf(sheet).includes('Payaza') && textOf(sheet).includes('Korapay'));
+const gatewayTabs = sheet.querySelectorAll('.seg button');
+ok('Korapay is the first payment tab and is selected by default', textOf(gatewayTabs[0]) === 'Korapay' && gatewayTabs[0].classList.contains('on') && !gatewayTabs[1].classList.contains('on'));
 ok('recipient field only takes 10 digits', sheet.querySelectorAll('input')[0].attrs.maxlength === '10' && sheet.querySelectorAll('input')[0].attrs.type === 'tel');
 await byText(sheet, 'Cancel')?.click?.();
 document.body.querySelector('#sheet-root').querySelectorAll('.icon-btn').forEach((b) => b.click());
@@ -327,6 +330,7 @@ const everything = [view, sheets()].map(textOf).join(' ');
 switchTab('home'); await wait(200);
 ok('no "become an agent" / dashboard wording anywhere', !/become an agent|agent dashboard|your own data store|plan upgrade/i.test(everything + textOf(view)));
 const { readdirSync } = await import('node:fs');
+ok('the three onboarding pictures are in the app', [1, 2, 3].every((n) => readdirSync(path.join(ROOT, 'app/assets/onboarding')).includes(`slide-${n}.jpg`)));
 ok('there is no agent screen module', !readdirSync(path.join(ROOT, 'app/js')).includes('agent.js'));
 
 console.log(failures ? `\n${failures} FAILED` : '\nAll smoke checks passed');

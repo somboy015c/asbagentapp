@@ -85,9 +85,10 @@ The app needs two small backend changes (included in the update zip):
 - `config/cors.php` allows the app's origin (`https://localhost`). **Without this the app cannot talk to the API.**
 - `StorefrontController` also returns the store's full `domain`.
 
-### 6. Add your onboarding pictures
-Put `slide-1.png`, `slide-2.png`, `slide-3.png` in `app/assets/onboarding/` (about 1000x1000 px). Until then the
-coloured placeholders are shown. Commit and push. Pictures are shared by every store's app.
+### 6. Onboarding pictures
+The three welcome pictures are already included: `app/assets/onboarding/slide-1.jpg`, `slide-2.jpg`, `slide-3.jpg`
+(the same pictures for every store). To change one, replace the file with another of the same name (about 1100 px wide;
+`.png`, `.jpeg` and `.webp` also work). Landscape pictures are shown in full, never cropped.
 
 ### 7. First build
 **Actions > Build agent app > Run workflow > subdomain `smekart`** (use a real, live store). After ~6 to 10
@@ -118,7 +119,7 @@ splash, app icon, status bar, back button) appear only on the device.
 | Splash | Store logo tile + name + tagline on the brand colour (matches the native splash) |
 | Onboarding | 3 swipeable slides; words from the store's hero / services / call-to-action text; shown once |
 | Home | Like a typical VTU app: small header (logo, name, wallet balance), four quick buttons (Buy data, Orders, Refunds/Sign in, Support) and the data plans with a tab per network (MTN, Telecel, AirtelTigo...). Tap a plan, enter the number, pay |
-| Payment | Payaza opens in the in-app browser window; **Korapay** is shown inline on the app's own payment screen (our header and footer around its page). Either way the app confirms the payment by itself and shows the success animation; cancelled payments get a "Complete payment" button and the website emails the same link |
+| Payment | **Korapay is the first and default payment tab** and is shown inline on the app's own payment screen (our header and footer around its page); Payaza, the second tab, opens in the in-app browser window. Either way the app confirms the payment by itself and shows the success animation; cancelled payments get a "Complete payment" button and the website emails the same link |
 | Orders | Signed-in customers see their orders (tap one for details, unpaid orders can be paid). **Guests have no order history**: they see a clear "Sign in" button instead |
 | Sign in / Register / Verify / Forgot password | Customer accounts of this store only. **Register -> "Check your email" screen -> tap the link in the email (it opens the app) -> Sign in.** Signing in is refused until the email is verified. Phone numbers are exactly 10 digits, digits only |
 | Account (signed in) | Profile, wallet balance, refund history, change password, sign out; the same things the store website's customer dashboard offers |
